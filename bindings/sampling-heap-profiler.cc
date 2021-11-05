@@ -22,34 +22,44 @@
 using namespace v8;
 
 Local<Value> TranslateAllocationProfile(AllocationProfile::Node* node) {
+  Local<Context> ctx = Nan::GetCurrentContext();
   Local<Object> js_node = Nan::New<Object>();
-  js_node->Set(Nan::New<String>("name").ToLocalChecked(),
+  js_node->Set(ctx,
+    Nan::New<String>("name").ToLocalChecked(),
     node->name);
-  js_node->Set(Nan::New<String>("scriptName").ToLocalChecked(),
+  js_node->Set(ctx,
+    Nan::New<String>("scriptName").ToLocalChecked(),
     node->script_name);
-  js_node->Set(Nan::New<String>("scriptId").ToLocalChecked(),
+  js_node->Set(ctx,
+    Nan::New<String>("scriptId").ToLocalChecked(),
     Nan::New<Integer>(node->script_id));
-  js_node->Set(Nan::New<String>("lineNumber").ToLocalChecked(),
+  js_node->Set(ctx,
+    Nan::New<String>("lineNumber").ToLocalChecked(),
     Nan::New<Integer>(node->line_number));
-  js_node->Set(Nan::New<String>("columnNumber").ToLocalChecked(),
+  js_node->Set(ctx,
+    Nan::New<String>("columnNumber").ToLocalChecked(),
     Nan::New<Integer>(node->column_number));
   Local<Array> children = Nan::New<Array>(node->children.size());
   for (size_t i = 0; i < node->children.size(); i++) {
-    children->Set(i, TranslateAllocationProfile(node->children[i]));
+    children->Set(ctx, i, TranslateAllocationProfile(node->children[i]));
   }
-  js_node->Set(Nan::New<String>("children").ToLocalChecked(),
+  js_node->Set(ctx,
+    Nan::New<String>("children").ToLocalChecked(),
     children);
   Local<Array> allocations = Nan::New<Array>(node->allocations.size());
   for (size_t i = 0; i < node->allocations.size(); i++) {
     AllocationProfile::Allocation alloc = node->allocations[i];
     Local<Object> js_alloc = Nan::New<Object>();
-    js_alloc->Set(Nan::New<String>("size").ToLocalChecked(),
+    js_alloc->Set(ctx,
+      Nan::New<String>("size").ToLocalChecked(),
       Nan::New<Number>(alloc.size));
-    js_alloc->Set(Nan::New<String>("count").ToLocalChecked(),
+    js_alloc->Set(ctx,
+      Nan::New<String>("count").ToLocalChecked(),
       Nan::New<Number>(alloc.count));
-    allocations->Set(i, js_alloc);
+    allocations->Set(ctx, i, js_alloc);
   }
-  js_node->Set(Nan::New<String>("allocations").ToLocalChecked(),
+  js_node->Set(ctx,
+    Nan::New<String>("allocations").ToLocalChecked(),
     allocations);
   return js_node;
 }
